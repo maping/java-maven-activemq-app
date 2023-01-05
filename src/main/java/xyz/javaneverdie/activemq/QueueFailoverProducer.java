@@ -4,10 +4,10 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
 
-public class QueueProducer {
+public class QueueFailoverProducer {
 
-    private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String QUEUE_NAME = "queue-quickstart";
+    private static final String BROKER_URL = "failover:(tcp://10.10.71.1.4:61616,tcp://10.71.1.5:61616,tcp://10.71.1.6:61616";
+    private static final String QUEUE_NAME = "queue-failover";
     private static final Boolean NON_TRANSACTED = false;
     private static final int NUM_MESSAGES_TO_SEND = 3;
     private static final long DELAY = 100;
@@ -30,7 +30,7 @@ public class QueueProducer {
         MessageProducer producer = session.createProducer(destination);
         //6 发送消息到Queue
         for (int i = 0; i < NUM_MESSAGES_TO_SEND; i++) {
-            TextMessage message = session.createTextMessage("Message #" + i);     
+            TextMessage message = session.createTextMessage("Message #" + i);
             System.out.println("Sending message #" + i);
             producer.send(message);
             Thread.sleep(DELAY);

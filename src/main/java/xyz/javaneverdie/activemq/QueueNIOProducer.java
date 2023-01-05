@@ -4,10 +4,10 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
 
-public class QueueProducer {
+public class QueueNIOProducer {
 
-    private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String QUEUE_NAME = "queue-quickstart";
+    private static final String BROKER_URL = "nio://localhost:61618";
+    private static final String QUEUE_NAME = "queue-nio";
     private static final Boolean NON_TRANSACTED = false;
     private static final int NUM_MESSAGES_TO_SEND = 3;
     private static final long DELAY = 100;
