@@ -1,14 +1,15 @@
-package xyz.javaneverdie.activemq;
+package xyz.javaneverdie.activemq.advanced;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
+import org.apache.activemq.ScheduledMessage;
 
-public class QueueNonPersistentProducer {
+public class QueueDelayProducer {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
+    private static final String QUEUE_NAME = "queue-delay";
     private static final Boolean NON_TRANSACTED = false;
-    private static final String QUEUE_NAME = "queue-non-persistent";
     private static final int NUM_MESSAGES_TO_SEND = 3;
     private static final long DELAY = 100;
 
@@ -28,13 +29,21 @@ public class QueueNonPersistentProducer {
         Destination destination = session.createQueue(QUEUE_NAME);
         //5 创建消息的生产者
         MessageProducer producer = session.createProducer(destination);
-        // 默认队列生产者发送消息的交付模式为持久化，发送消息后，如果 ActiveMQ 宕机，消息依然存在
-        // 以下设置队列生产者发送消息的交付模式为非持久化，发送消息后，如果 ActiveMQ 宕机，消息就丢失了
-        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
-        //6 发送消息到 Queue
+
+        long delay = 5000; //延迟投递时间
+        long period = 3000; //重复投递间隔时间
+        int repeat = 3; //重复投递次数
+
+        //6 发送消息到Queue
         for (int i = 0; i < NUM_MESSAGES_TO_SEND; i++) {
-            TextMessage message = session.createTextMessage("Message #" + i);     
+            TextMessage message = session.createTextMessage("Message #" + i);
             System.out.println("Sending message #" + i);
+
+            // 通过消息属性来设置延迟投递
+            message.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+            message.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_PERIOD, period);
+            message.setIntProperty(ScheduledMessage.AMQ_SCHEDULED_REPEAT, repeat);
+
             producer.send(message);
             Thread.sleep(DELAY);
         }

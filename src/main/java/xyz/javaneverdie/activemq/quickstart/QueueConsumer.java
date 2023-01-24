@@ -1,4 +1,4 @@
-package xyz.javaneverdie.activemq;
+package xyz.javaneverdie.activemq.quickstart;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
@@ -7,9 +7,9 @@ import javax.jms.*;
 public class QueueConsumer {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String QUEUE_NAME = "queue-quickstart";
+    private static final String QUEUE_NAME = "queue-cron";
     private static final Boolean NON_TRANSACTED = false;
-    private static final long TIMEOUT = 3000;
+    private static final long TIMEOUT = 30000;
 
     public static void main(String[] args) throws Exception {
         String url = BROKER_URL;

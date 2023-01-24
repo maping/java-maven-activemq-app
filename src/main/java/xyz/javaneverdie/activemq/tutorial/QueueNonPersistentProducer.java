@@ -1,14 +1,14 @@
-package xyz.javaneverdie.activemq;
+package xyz.javaneverdie.activemq.tutorial;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
 
-public class TopicProducer {
+public class QueueNonPersistentProducer {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
     private static final Boolean NON_TRANSACTED = false;
-    private static final String TOPIC_NAME = "topic-quickstart";
+    private static final String QUEUE_NAME = "queue-non-persistent";
     private static final int NUM_MESSAGES_TO_SEND = 3;
     private static final long DELAY = 100;
 
@@ -24,13 +24,16 @@ public class TopicProducer {
         connection.start();
         //3 创建会话
         Session session = connection.createSession(NON_TRANSACTED, Session.AUTO_ACKNOWLEDGE);
-        //4 创建目的地：Topic
-        Destination destination = session.createTopic(TOPIC_NAME);
+        //4 创建目的地：Queue
+        Destination destination = session.createQueue(QUEUE_NAME);
         //5 创建消息的生产者
         MessageProducer producer = session.createProducer(destination);
-        //6 发送消息到 Topic
+        // 默认队列生产者发送消息的交付模式为持久化，发送消息后，如果 ActiveMQ 宕机，消息依然存在
+        // 以下设置队列生产者发送消息的交付模式为非持久化，发送消息后，如果 ActiveMQ 宕机，消息就丢失了
+        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+        //6 发送消息到 Queue
         for (int i = 0; i < NUM_MESSAGES_TO_SEND; i++) {
-            TextMessage message = session.createTextMessage("Message #" + i);
+            TextMessage message = session.createTextMessage("Message #" + i);     
             System.out.println("Sending message #" + i);
             producer.send(message);
             Thread.sleep(DELAY);

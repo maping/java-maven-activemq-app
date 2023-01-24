@@ -1,4 +1,4 @@
-package xyz.javaneverdie.activemq;
+package xyz.javaneverdie.activemq.quickstart;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 

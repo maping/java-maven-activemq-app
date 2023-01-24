@@ -1,49 +1,41 @@
-package xyz.javaneverdie.activemq;
+package xyz.javaneverdie.activemq.advanced;
 
+import xyz.javaneverdie.activemq.tutorial.*;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 import javax.jms.*;
 
-public class QueueTransactionConsumer {
+public class QueueRedeliveryProducer {
 
     private static final String BROKER_URL = "tcp://localhost:61616";
-    private static final String QUEUE_NAME = "queue-transacted";
     private static final Boolean TRANSACTED = true;
-    private static final long TIMEOUT = 3000;
+    private static final String QUEUE_NAME = "queue-redelivery";
+    private static final int NUM_MESSAGES_TO_SEND = 3;
+    private static final long DELAY = 100;
 
     public static void main(String[] args) {
         String url = BROKER_URL;
         if (args.length > 0) {
             url = args[0].trim();
         }
-        System.out.println("\nWaiting to receive messages... will timeout after " + TIMEOUT / 1000 + "s");
-
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("admin", "password", url);
         Connection connection = null;
         Session session = null;
-
         try {
             connection = connectionFactory.createConnection();
             connection.start();
             // 创建带事务的 session 对象
             session = connection.createSession(TRANSACTED, Session.AUTO_ACKNOWLEDGE);
             Destination destination = session.createQueue(QUEUE_NAME);
-            MessageConsumer consumer = session.createConsumer(destination);
-
-            int i = 0;
-            while (true) {
-                Message message = consumer.receive(TIMEOUT);
-                if (message != null) {
-                    if (message instanceof TextMessage) {
-                        String text = ((TextMessage) message).getText();
-                        System.out.println("Got " + i++ + ". message: " + text);
-                    }
-                } else {
-                    break;
-                }
+            MessageProducer producer = session.createProducer(destination);
+            for (int i = 0; i < NUM_MESSAGES_TO_SEND; i++) {
+                TextMessage message = session.createTextMessage("Message #" + i);
+                System.out.println("Sending message #" + i);
+                producer.send(message);
+                Thread.sleep(DELAY);
             }
-            consumer.close();
-            // 带事务的 session 必须执行 commit 才能真正的消费并删除消息，否则消息会一直在，导致重复消费消息
+            producer.close();
+            // 带事务的 session 必须执行 commit 才能真正地生产消息
             session.commit();
         } catch (Exception e) {
             System.out.println("Caught exception! Try to rollback session!");
